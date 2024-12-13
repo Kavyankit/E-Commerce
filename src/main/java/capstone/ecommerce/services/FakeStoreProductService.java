@@ -1,6 +1,7 @@
 package capstone.ecommerce.services;
 
 import capstone.ecommerce.dtos.FakeStoreProductDto;
+import capstone.ecommerce.exceptions.ProductNotFoundException;
 import capstone.ecommerce.models.Product;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +11,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
+@Service("fakeStoreProductService")
 public class FakeStoreProductService implements ProductService{
 
     private RestTemplate restTemplate;
@@ -31,10 +32,7 @@ public class FakeStoreProductService implements ProductService{
     }
 
     @Override
-    public Product getSingleProduct(long id) {
-        /*FakeStoreProductDto fakeStoreProductDto = restTemplate.getForObject("https://fakestoreapi.com/products/"+id,
-                FakeStoreProductDto.class);
-        return fakeStoreProductDto.toProduct();*/
+    public Product getSingleProduct(long id) throws ProductNotFoundException {
         ResponseEntity<FakeStoreProductDto> fakeStoreProductDtoResponseEntity = restTemplate.getForEntity("https://fakestoreapi.com/products/"+id,
                 FakeStoreProductDto.class);
         if(fakeStoreProductDtoResponseEntity.getStatusCode() != HttpStatusCode.valueOf(200)){
@@ -42,8 +40,7 @@ public class FakeStoreProductService implements ProductService{
         }
         FakeStoreProductDto fakeStoreProductDto = fakeStoreProductDtoResponseEntity.getBody();
         if(fakeStoreProductDto == null){
-            //handle this exception
-            return null;
+            throw new ProductNotFoundException("Product with id "+id+" is not present with the service. It's an invalid id");
         }
         return fakeStoreProductDto.toProduct();
     }
@@ -66,4 +63,26 @@ public class FakeStoreProductService implements ProductService{
                 FakeStoreProductDto.class);
         return fakeStoreProductDto1.toProduct();
     }
+
+    /*@Override
+    public Product updateProduct(long id, CreateProductRequestDto createProductRequestDto) {
+        FakeStoreProductDto fakeStoreProductDto = new FakeStoreProductDto();
+        fakeStoreProductDto.setTitle(createProductRequestDto.getTitle());
+        fakeStoreProductDto.setDescription(createProductRequestDto.getDescription());
+        fakeStoreProductDto.setImage(createProductRequestDto.getImage());
+        fakeStoreProductDto.setCategory(createProductRequestDto.getCategory());
+        fakeStoreProductDto.setPrice(createProductRequestDto.getPrice());
+
+        restTemplate.put("https://fakestoreapi.com/products/"+id,
+                fakeStoreProductDto);
+        return getSingleProduct(id);
+    }
+
+    @Override
+    public boolean deleteProduct(long id) {
+        restTemplate.delete("https://fakestoreapi.com/products/"+id);
+        return true;
+    }*/
+
+
 }

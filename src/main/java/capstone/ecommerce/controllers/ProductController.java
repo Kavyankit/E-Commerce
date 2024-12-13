@@ -1,8 +1,10 @@
 package capstone.ecommerce.controllers;
 
 import capstone.ecommerce.dtos.CreateProductRequestDto;
+import capstone.ecommerce.exceptions.ProductNotFoundException;
 import capstone.ecommerce.models.Product;
 import capstone.ecommerce.services.ProductService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +16,7 @@ public class ProductController {
 
     public ProductService productService;
 
-    public ProductController(ProductService productService) {
+    public ProductController(@Qualifier("selfProductService") ProductService productService) {
         this.productService = productService;
     }
 
@@ -24,7 +26,7 @@ public class ProductController {
     }
 
     @GetMapping("/products/{id}")
-    public ResponseEntity<Product> getSingleProduct(@PathVariable("id") long id) {
+    public ResponseEntity<Product> getSingleProduct(@PathVariable("id") long id) throws ProductNotFoundException {
         Product p = productService.getSingleProduct(id);
         ResponseEntity<Product> responseEntity;
         if(p==null){
@@ -46,13 +48,24 @@ public class ProductController {
                 createProductRequestDto.getPrice());
     }
 
+    /*
     @PostMapping("/products/{id}")
-    public String updateProduct(@PathVariable("id") long id) {
-        return null;
+    public ResponseEntity<Product> updateProduct(@PathVariable("id") long id, @RequestBody CreateProductRequestDto createProductRequestDto) {
+        Product updatedProduct = productService.updateProduct(id, createProductRequestDto);
+        if(updatedProduct == null){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>((updatedProduct), HttpStatus.OK);
     }
 
     @DeleteMapping("/products/{id}")
-    public String deleteProduct(@PathVariable("id") long id) {
-        return null;
+    public ResponseEntity<Void> deleteProduct(@PathVariable("id") long id) {
+        boolean isDeleted = productService.deleteProduct(id);
+        if(!isDeleted){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+    */
+
 }
